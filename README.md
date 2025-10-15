@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 제품 요구사항 문서 (PRD)
 
-## Getting Started
+## 제품명
 
-First, run the development server:
+**GGR(Good Game Record)**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 1. 개요
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`GGR`은 **라이엇 게임즈 API**를 활용한 **리그 오브 레전드(LoL) 전적 검색 및 플레이 분석 웹 서비스**입니다.  
+유저는 자신의 소환사명을 검색해 최근 경기 전적, 챔피언별 승률, 포지션별 통계 등을 직관적으로 확인할 수 있습니다.  
+데이터 시각화를 통해 유저가 자신의 플레이 스타일을 한눈에 이해할 수 있도록 돕습니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 2. 문제 정의
 
-To learn more about Next.js, take a look at the following resources:
+- 기존 전적 검색 사이트(OP.GG, YOUR.GG 등)는 기능이 많지만 **광고 과다**, **과도한 UI 복잡도**로 사용자 피로도가 높음.
+- 플레이어는 자신의 **실제 강점과 약점**을 빠르게 파악하기 어려움.
+- 단순히 전적만 나열하는 사이트가 아닌, **직관적이고 빠른 플레이 인사이트 제공 서비스**가 필요함.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 3. 목표 및 목적
 
-## Deploy on Vercel
+- **1차 목표:** 전적 검색과 통계 분석을 통해 개인의 플레이 스타일을 명확히 보여주는 웹 서비스 구축.
+- **2차 목표:** 재방문율 70% 이상 달성 (최근 검색 및 즐겨찾기 기능 포함).
+- **성공 지표:**  
+  • 검색 성공률 95% 이상  
+  • 평균 응답 시간 2초 이하  
+  • 월간 사용자 5,000명 이상
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 4. 타깃 사용자
+
+### 주요 사용자
+
+- **랭크 게임을 자주 하는 10~30대 LoL 게이머**
+- 자신의 **승률·챔피언별 통계·플레이 패턴**을 분석하고 싶은 유저
+
+### 이해관계자
+
+- 코치 및 스트리머: 분석용 자료 확보
+- e스포츠 관련 커뮤니티 운영자
+
+---
+
+## 5. 사용자 스토리
+
+- “내 소환사명을 입력하면 바로 최근 경기와 승률을 보고 싶다.”
+- “내가 가장 잘하는 챔피언과 약한 챔피언이 뭔지 알고 싶다.”
+- “티어별 평균 스탯과 내 데이터를 비교해서 성장 방향을 알고 싶다.”
+
+---
+
+## 6. 기능 요구사항
+
+### ✅ 핵심 기능
+
+1. **소환사명 기반 전적 검색**
+
+   - 설명: 유저의 소환사명을 입력하면 Riot API를 호출하여 최근 경기 데이터(최대 20판)를 불러옴.
+   - API 출처: [Riot Games Developer API](https://developer.riotgames.com/apis)
+   - 주요 사용 API  
+     • `/lol/summoner/v4/summoners/by-name/{summonerName}`  
+     • `/lol/match/v5/matches/by-puuid/{puuid}/ids`  
+     • `/lol/match/v5/matches/{matchId}`
+   - 수용 기준  
+     • 평균 응답 < 2초  
+     • 존재하지 않는 닉네임 시 에러 메시지 표시  
+     • 최근 검색 자동 저장
+
+2. **챔피언별 통계 분석**
+   - 설명: Riot API 데이터를 기반으로 챔피언별 KDA, CS, 승률, 게임 수 등을 시각화.
+   - 수용 기준  
+     • 최근 20경기 평균값 기준  
+     • 티어별 평균과 비교 그래프 표시  
+     • 승률 변화 추이(최근 10경기 기준) 시각화
+
+---
+
+### ⚙️ 추가 기능 (Phase 2 이후)
+
+- AI 기반 플레이 스타일 분석 (공격적/안정적 등 성향 분류)
+- 티어별/서버별 메타 분석
+- 즐겨찾기 소환사 등록 및 비교
+- 다크모드 자동 전환
+- 유저 간 전적 비교 기능
+
+---
+
+## 7. 비기능 요구사항
+
+- **성능:** 평균 응답 2초 이하, 캐시로 API 호출 최소화
+- **보안:** Riot API Key 환경변수로 관리 (`.env.local`)
+- **사용성:** 모바일/데스크톱 반응형 UI
+- **확장성:** Riot API 버전 변경 시 자동 업데이트 구조
+- **호환성:** 최신 Chrome, Edge, Safari 브라우저 지원
+
+---
+
+## 8. 기술 고려사항
+
+- **프론트엔드:** Next.js (create-next-app 기반, 최신 App Router 사용), TypeScript, Tailwind CSS
+- **API 연동:** Next.js API Routes + Riot De

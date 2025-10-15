@@ -1,103 +1,141 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import * as Form from "@radix-ui/react-form";
+import { Search, Loader2, X } from "lucide-react";
+import {
+  SummonerProfile,
+  SummonerData,
+} from "@/shared/components/summoner-profile";
+import MatchList from "@/shared/components/match-history/match-list";
+import { useSummonerStore, RecentSearch } from "@/shared/store/summoner-store";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const {
+    riotId,
+    setRiotId,
+    summonerData,
+    setSummonerData,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+    recentSearches,
+    addRecentSearch,
+    loadRecentSearches,
+  } = useSummonerStore();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  const [isInputFocused, setIsInputFocused] = useState(false);
+
+  useEffect(() => {
+    loadRecentSearches();
+  }, [loadRecentSearches]);
+
+  const handleSearch = async (id: string) => {
+    if (!id) return;
+
+    setIsLoading(true);
+    setError(null);
+    setSummonerData(null);
+    setIsInputFocused(false);
+
+    try {
+      const response = await fetch(`/api/account/${encodeURIComponent(id)}`);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "An unknown error occurred.");
+      }
+
+      const data: SummonerData = await response.json();
+      setSummonerData(data);
+      addRecentSearch(id, data.profileIconId); // profileIconId 추가
+      console.log("API Response:", data);
+    } catch (err: any) {
+      setError(err.message);
+      console.error(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    handleSearch(riotId);
+  };
+
+  const handleRecentSearchClick = (searchItem: RecentSearch) => {
+    setRiotId(searchItem.riotId);
+    handleSearch(searchItem.riotId);
+  };
+
+  return (
+    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900 text-white">
+      <div className="w-full max-w-xl space-y-4">
+        <h1 className="text-4xl font-bold text-center mb-8">GGR</h1>
+        <Form.Root onSubmit={handleSubmit} className="relative">
+          <Form.Field name="riotId">
+            <div className="relative">
+              <Form.Control asChild>
+                <input
+                  type="text"
+                  value={riotId || ""} // undefined 방지
+                  onChange={(e) => setRiotId(e.target.value)}
+                  onFocus={() => setIsInputFocused(true)}
+                  onBlur={() => setTimeout(() => setIsInputFocused(false), 150)} // Delay to allow click on recent search
+                  placeholder="Riot ID (GameName#TagLine)"
+                  className="w-full p-4 pr-12 text-lg bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                  disabled={isLoading}
+                  required
+                  autoComplete="off"
+                />
+              </Form.Control>
+              <Form.Submit asChild>
+                <button
+                  type="submit"
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-white disabled:opacity-50"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 size={24} className="animate-spin" />
+                  ) : (
+                    <Search size={24} />
+                  )}
+                </button>
+              </Form.Submit>
+            </div>
+          </Form.Field>
+          {isInputFocused && recentSearches.length > 0 && (
+            <div className="absolute top-full mt-2 w-full bg-gray-800 border border-gray-700 rounded-lg z-10">
+              <ul>
+                {recentSearches.map((searchItem, index) => (
+                  <li
+                    key={index}
+                    onClick={() => handleRecentSearchClick(searchItem)}
+                    className="flex items-center p-3 hover:bg-gray-700 cursor-pointer text-sm"
+                  >
+                    <img
+                      src={`https://ddragon.leagueoflegends.com/cdn/14.10.1/img/profileicon/${searchItem.profileIconId}.png`}
+                      alt="Profile Icon"
+                      className="w-6 h-6 rounded-full mr-2"
+                    />
+                    {searchItem.riotId}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </Form.Root>
+
+        {error && (
+          <div className="text-red-500 text-center p-2 bg-red-900/50 rounded-lg">
+            {error}
+          </div>
+        )}
+
+        {summonerData && <SummonerProfile summonerData={summonerData} />}
+        {summonerData?.puuid && <MatchList puuid={summonerData.puuid} />}
+      </div>
+    </main>
   );
 }
