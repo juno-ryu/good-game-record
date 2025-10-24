@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import { Search, Loader2, X } from "lucide-react";
+import { Search, Loader2, X, Gamepad } from "lucide-react";
 import {
   SummonerProfile,
   SummonerData,
 } from "@/shared/components/summoner-profile";
 import MatchList from "@/shared/components/match-history/match-list";
+import ChampionSummary from "@/shared/components/match-history/champion-summary";
+import MatchSummary from "@/shared/components/match-history/match-summary";
 import { useSummonerStore, RecentSearch } from "@/shared/store/summoner-store";
 
 export default function Home() {
@@ -70,10 +72,15 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-900 text-white">
-      <div className="w-full max-w-xl space-y-4">
-        <h1 className="text-4xl font-bold text-center mb-8">GGR</h1>
-        <Form.Root onSubmit={handleSubmit} className="relative">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-gray-900 text-white">
+      <div className="w-full max-w-6xl space-y-4">
+        <h1 className="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-2 mx-auto">
+          <Gamepad size={36} /> GGR
+        </h1>
+        <Form.Root
+          onSubmit={handleSubmit}
+          className={`relative ${summonerData ? "w-full" : "max-w-lg mx-auto"}`}
+        >
           <Form.Field name="riotId">
             <div className="relative">
               <Form.Control asChild>
@@ -133,8 +140,18 @@ export default function Home() {
           </div>
         )}
 
-        {summonerData && <SummonerProfile summonerData={summonerData} />}
-        {summonerData?.puuid && <MatchList puuid={summonerData.puuid} />}
+        {summonerData && (
+          <div className="flex flex-col md:flex-row gap-4 mt-4">
+            <div className="w-full md:w-3/10 space-y-4">
+              <SummonerProfile summonerData={summonerData} />
+              {summonerData?.puuid && <MatchSummary />}
+              {summonerData?.puuid && <ChampionSummary />}
+            </div>
+            <div className="w-full md:w-7/10">
+              {summonerData?.puuid && <MatchList puuid={summonerData.puuid} />}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

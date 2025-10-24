@@ -4,7 +4,6 @@
 import { useEffect, useState } from "react"; // useState 임포트
 import { useMatchStore } from "@/shared/store/match-store";
 import MatchCard from "./match-card";
-import MatchSummary from "./match-summary";
 import MatchDetailModal from "./match-detail-modal"; // MatchDetailModal 임포트
 
 interface MatchListProps {
@@ -55,7 +54,6 @@ export default function MatchList({ puuid }: MatchListProps) {
 
   return (
     <div className="container mx-auto">
-      <MatchSummary />
       <div className="grid grid-cols-1 gap-4">
         {matches.map((match) => (
           <MatchCard
@@ -69,7 +67,9 @@ export default function MatchList({ puuid }: MatchListProps) {
         isOpen={isModalOpen}
         onOpenChange={setIsModalOpen}
         matchId={selectedMatchId}
-        matchDetails={matches.find(match => match.matchId === selectedMatchId)} // 선택된 매치 상세 정보 전달
+        matchDetails={matches.find(
+          (match) => match.matchId === selectedMatchId
+        )} // 선택된 매치 상세 정보 전달
       />
     </div>
   );

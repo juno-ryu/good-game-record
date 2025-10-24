@@ -115,6 +115,9 @@ export default function MatchDetailModal({
             {participant.kills}/{participant.deaths}/{participant.assists} (
             {kda})
           </p>
+          <p>CS: {participant.totalMinionsKilled}</p>
+          <p>Gold: {participant.goldEarned.toLocaleString()}</p>
+          <p>Damage: {participant.totalDamageDealtToChampions.toLocaleString()}</p>
           <div className="flex justify-end mt-1">
             {[
               participant.item0,

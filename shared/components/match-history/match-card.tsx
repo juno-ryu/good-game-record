@@ -1,12 +1,12 @@
 // shared/components/match-history/match-card.tsx
-'use client';
+"use client";
 
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/ko'; // Import Korean locale
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/ko"; // Import Korean locale
 
 dayjs.extend(relativeTime);
-dayjs.locale('ko'); // Use Korean locale
+dayjs.locale("ko"); // Use Korean locale
 
 interface MatchCardProps {
   match: {
@@ -15,6 +15,7 @@ interface MatchCardProps {
     gameDuration: number;
     gameEndTimestamp: number;
     win: boolean;
+    summonerName: string;
     championName: string;
     kills: number;
     deaths: number;
@@ -32,13 +33,16 @@ export default function MatchCard({ match, onCardClick }: MatchCardProps) {
     gameDuration,
     win,
     championName,
+    summonerName,
     kills,
     deaths,
     assists,
     teamPosition,
   } = match;
-
-  const kda = deaths === 0 ? (kills + assists).toFixed(2) : ((kills + assists) / deaths).toFixed(2);
+  const kda =
+    deaths === 0
+      ? (kills + assists).toFixed(2)
+      : ((kills + assists) / deaths).toFixed(2);
 
   // Format game duration
   const minutes = Math.floor(gameDuration / 60);
@@ -60,16 +64,23 @@ export default function MatchCard({ match, onCardClick }: MatchCardProps) {
           className="w-full h-full rounded-full object-cover border-2 border-gray-600"
           onError={(e) => {
             e.currentTarget.onerror = null; // prevents looping
-            e.currentTarget.src = '/file.svg'; // Fallback image
+            e.currentTarget.src = "/file.svg"; // Fallback image
           }}
         />
       </div>
 
       <div className="flex-grow text-white">
         <div className="flex justify-between items-center mb-1">
-          <span className={`font-bold text-lg ${win ? 'text-blue-400' : 'text-red-400'}`}>{win ? '승리' : '패배'}</span>
+          <span
+            className={`font-bold text-lg ${
+              win ? "text-blue-400" : "text-red-400"
+            }`}
+          >
+            {win ? "승리" : "패배"}
+          </span>
           <span className="text-sm text-gray-300">{gameDate}</span>
         </div>
+        <p className="font-semibold text-lg text-white">{summonerName}</p>
         <p className="text-md">
           {championName} ({teamPosition})
         </p>
