@@ -71,6 +71,7 @@ interface MatchState {
 export const useMatchStore = create<MatchState>((set, get) => ({
   matches: [],
   summary: null,
+  championStats: [],
   isLoading: false,
   error: null,
   fetchMatches: async (puuid: string) => {
@@ -127,20 +128,23 @@ export const useMatchStore = create<MatchState>((set, get) => ({
           ? (totalKills + totalAssists).toFixed(2) // Avoid division by zero
           : ((totalKills + totalAssists) / totalDeaths).toFixed(2);
 
-      const killParticipation = 
+      const killParticipation =
         totalMatches > 0
           ? ((totalKillParticipation / totalMatches) * 100).toFixed(0) + "%"
           : "0%";
 
       // Calculate champion statistics
-      const championStatsMap = new Map<string, {
-        wins: number;
-        losses: number;
-        totalGames: number;
-        kills: number;
-        deaths: number;
-        assists: number;
-      }>();
+      const championStatsMap = new Map<
+        string,
+        {
+          wins: number;
+          losses: number;
+          totalGames: number;
+          kills: number;
+          deaths: number;
+          assists: number;
+        }
+      >();
 
       matches.forEach((match) => {
         const participant = match.participants.find((p) => p.puuid === puuid);
@@ -169,13 +173,15 @@ export const useMatchStore = create<MatchState>((set, get) => ({
         }
       });
 
-      const calculatedChampionStats: ChampionStats[] = Array.from(championStatsMap.entries()).map(
-        ([championName, stats]) => {
-          const winRate = 
+      const calculatedChampionStats: ChampionStats[] = Array.from(
+        championStatsMap.entries()
+      )
+        .map(([championName, stats]) => {
+          const winRate =
             stats.totalGames > 0
               ? ((stats.wins / stats.totalGames) * 100).toFixed(0) + "%"
               : "0%";
-          const kda = 
+          const kda =
             stats.deaths === 0
               ? (stats.kills + stats.assists).toFixed(2) // Avoid division by zero
               : ((stats.kills + stats.assists) / stats.deaths).toFixed(2);
@@ -187,8 +193,8 @@ export const useMatchStore = create<MatchState>((set, get) => ({
             winRate,
             kda: `${kda}:1`,
           };
-        }
-      ).sort((a, b) => b.wins + b.losses - (a.wins + a.losses)); // Sort by total games played (descending)
+        })
+        .sort((a, b) => b.wins + b.losses - (a.wins + a.losses)); // Sort by total games played (descending)
 
       set({
         matches,

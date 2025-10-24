@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { puuid: string } }
+  context: { params: Promise<{ puuid: string }> }
 ) {
-  const { puuid } = await params; // await 추가
+  const { puuid } = await context.params; // await 추가
 
   if (!puuid) {
     return NextResponse.json({ error: "PUUID is required" }, { status: 400 });

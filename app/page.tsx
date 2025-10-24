@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
-import { Search, Loader2, X, Gamepad } from "lucide-react";
+import { Search, Loader2, Gamepad } from "lucide-react";
 import {
   SummonerProfile,
   SummonerData,
@@ -11,6 +11,7 @@ import MatchList from "@/shared/components/match-history/match-list";
 import ChampionSummary from "@/shared/components/match-history/champion-summary";
 import MatchSummary from "@/shared/components/match-history/match-summary";
 import { useSummonerStore, RecentSearch } from "@/shared/store/summoner-store";
+import Image from "next/image";
 
 export default function Home() {
   const {
@@ -121,10 +122,13 @@ export default function Home() {
                     onClick={() => handleRecentSearchClick(searchItem)}
                     className="flex items-center p-3 hover:bg-gray-700 cursor-pointer text-sm"
                   >
-                    <img
+                    <Image
                       src={`https://ddragon.leagueoflegends.com/cdn/14.10.1/img/profileicon/${searchItem.profileIconId}.png`}
                       alt="Profile Icon"
                       className="w-6 h-6 rounded-full mr-2"
+                      width={24}
+                      height={24}
+                      unoptimized
                     />
                     {searchItem.riotId}
                   </li>
