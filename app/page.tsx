@@ -53,7 +53,6 @@ export default function Home() {
       const data: SummonerData = await response.json();
       setSummonerData(data);
       addRecentSearch(id, data.profileIconId); // profileIconId 추가
-      console.log("API Response:", data);
     } catch (err: any) {
       setError(err.message);
       console.error(err.message);
@@ -73,8 +72,8 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-gray-900 text-white">
-      <div className="w-full max-w-6xl space-y-4">
+    <main className="flex min-h-screen flex-col items-center p-4 md:p-24 bg-gray-900 text-white">
+      <div className="w-full max-w-6xl">
         <h1 className="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-2 mx-auto">
           <Gamepad size={36} /> GGR
         </h1>

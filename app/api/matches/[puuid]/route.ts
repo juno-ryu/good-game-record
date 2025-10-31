@@ -13,7 +13,7 @@ export async function GET(
   try {
     // 1. Fetch match IDs
     const matchIdsResponse = await fetch(
-      `https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=20`, // Fetching 20 matches as per PRD2
+      `https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10`, // Fetching 20 matches as per PRD2
       {
         headers: {
           "X-Riot-Token": process.env.RIOT_API_KEY || "",
@@ -31,7 +31,6 @@ export async function GET(
     }
 
     const matchIds: string[] = await matchIdsResponse.json();
-
     // 2. Fetch detailed match data for each match ID
     const matchDetailsPromises = matchIds.map(async (matchId) => {
       const matchDetailResponse = await fetch(
@@ -51,62 +50,11 @@ export async function GET(
       return matchDetailResponse.json();
     });
 
-    const matchDetails = (await Promise.all(matchDetailsPromises)).filter(
-      (match) => match !== null
-    );
+    const matchDetails = (await Promise.all(matchDetailsPromises))
+      .filter((match) => match !== null)
+      .map((match) => match.info);
 
-    // 3. Process and extract relevant data (as per PRD2)
-    const processedMatches = matchDetails
-      .map((match: any) => {
-        const participant = match.info.participants.find(
-          (p: any) => p.puuid === puuid
-        );
-
-        if (!participant) {
-          return null; // Should not happen if PUUID is correct
-        }
-
-        return {
-          matchId: match.metadata.matchId,
-          gameCreation: match.info.gameCreation,
-          gameDuration: match.info.gameDuration,
-          gameEndTimestamp: match.info.gameEndTimestamp,
-          win: participant.win,
-          summonerName: participant.summonerName, // Add summonerName
-          championName: participant.championName,
-          kills: participant.kills,
-          deaths: participant.deaths,
-          assists: participant.assists,
-          teamPosition: participant.teamPosition,
-          // Add more details as needed for the modal
-          participants: match.info.participants.map((p: any) => ({
-            puuid: p.puuid,
-            summonerName: p.summonerName,
-            championName: p.championName,
-            kills: p.kills,
-            deaths: p.deaths,
-            assists: p.assists,
-            win: p.win,
-            item0: p.item0,
-            item1: p.item1,
-            item2: p.item2,
-            item3: p.item3,
-            item4: p.item4,
-            item5: p.item5,
-            item6: p.item6,
-            totalDamageDealtToChampions: p.totalDamageDealtToChampions,
-            totalMinionsKilled: p.totalMinionsKilled,
-            goldEarned: p.goldEarned,
-            perks: p.perks, // Runes
-            summoner1Id: p.summoner1Id, // Summoner spell 1
-            summoner2Id: p.summoner2Id, // Summoner spell 2
-            teamId: p.teamId, // Add teamId
-          })),
-        };
-      })
-      .filter((match) => match !== null);
-
-    return NextResponse.json(processedMatches);
+    return NextResponse.json(matchDetails);
   } catch (error: any) {
     console.error("Error fetching match data:", error);
     return NextResponse.json(

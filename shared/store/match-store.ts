@@ -1,66 +1,36 @@
+"use client";
+
 import { create } from "zustand";
+import { MatchDto } from "@/shared/utils/types/match-dto";
 
-export interface ParticipantDetail {
-  puuid: string;
-  summonerName: string;
-  championName: string;
-  kills: number;
-  deaths: number;
-  assists: number;
-  win: boolean;
-  item0: number;
-  item1: number;
-  item2: number;
-  item3: number;
-  item4: number;
-  item5: number;
-  item6: number;
-  totalDamageDealtToChampions: number;
-  totalMinionsKilled: number;
-  goldEarned: number;
-  perks: any; // Define more specifically if needed
-  summoner1Id: number;
-  summoner2Id: number;
-  teamId: number; // Add teamId
-}
+// ----------------- UI에 필요한 타입 정의 -----------------
 
-export interface Match {
-  matchId: string;
-  gameCreation: number;
-  gameDuration: number;
-  gameEndTimestamp: number;
-  win: boolean;
-  summonerName: string;
-  championName: string;
-  kills: number;
-  deaths: number;
-  assists: number;
-  teamPosition: string;
-  participants: ParticipantDetail[];
-}
-
-interface MatchSummary {
+// 전적 요약 정보를 담는 인터페이스
+export interface MatchSummary {
   totalMatches: number;
   wins: number;
   losses: number;
   winRate: string;
   averageKDA: string;
-  averageKills: string;
-  averageDeaths: string;
-  averageAssists: string;
+  averageKills: number;
+  averageDeaths: number;
+  averageAssists: number;
   killParticipation: string;
 }
 
+// 챔피언별 통계 정보를 담는 인터페이스
 export interface ChampionStats {
   championName: string;
   wins: number;
   losses: number;
   winRate: string;
   kda: string;
+  totalGames: number;
 }
 
+// Zustand 스토어의 전체 상태 인터페이스
 interface MatchState {
-  matches: Match[];
+  matches: MatchDto[]; // MatchDto를 직접 사용
   summary: MatchSummary | null;
   championStats: ChampionStats[];
   isLoading: boolean;
@@ -68,148 +38,110 @@ interface MatchState {
   fetchMatches: (puuid: string) => Promise<void>;
 }
 
-export const useMatchStore = create<MatchState>((set, get) => ({
+// ----------------- 데이터 처리 헬퍼 함수 -----------------
+
+const calculateKDAString = (
+  kills: number,
+  deaths: number,
+  assists: number
+): string => {
+  if (deaths === 0) {
+    return "Perfect";
+  }
+  return ((kills + assists) / deaths).toFixed(2);
+};
+
+// ----------------- Zustand 스토어 생성 -----------------
+
+export const useMatchStore = create<MatchState>((set) => ({
+  // 초기 상태
   matches: [],
   summary: null,
   championStats: [],
   isLoading: false,
   error: null,
+
   fetchMatches: async (puuid: string) => {
     set({ isLoading: true, error: null });
     try {
+      // 1. API를 통해 원시 매치 데이터(MatchDto[]) 가져오기
       const response = await fetch(`/api/matches/${puuid}`);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch match data");
       }
-      const matches: Match[] = await response.json();
+      const rawMatches: MatchDto[] = await response.json();
 
-      console.log(matches);
-      // Calculate summary
-      const totalMatches = matches.length;
-      const wins = matches.filter((match) => match.win).length;
-      const losses = totalMatches - wins;
-      const winRate =
-        totalMatches > 0
-          ? ((wins / totalMatches) * 100).toFixed(0) + "%"
-          : "0%";
+      if (rawMatches.length === 0) {
+        set({ matches: [], summary: null, championStats: [], isLoading: false });
+        return;
+      }
 
+      // 2. 데이터 계산 (요약 및 챔피언 통계)
       let totalKills = 0;
       let totalDeaths = 0;
       let totalAssists = 0;
       let totalKillParticipation = 0;
-
-      matches.forEach((match) => {
-        const participant = match.participants.find((p) => p.puuid === puuid);
-        if (participant) {
-          totalKills += participant.kills;
-          totalDeaths += participant.deaths;
-          totalAssists += participant.assists;
-
-          const teamId = participant.teamId;
-
-          const teamKills = match.participants
-            .filter((p) => p.teamId === teamId)
-            .reduce((sum: number, p) => sum + p.kills, 0);
-
-          if (teamKills > 0) {
-            totalKillParticipation +=
-              (participant.kills + participant.assists) / teamKills;
-          }
-        }
-      });
-
-      const averageKills = (totalKills / totalMatches).toFixed(1);
-      const averageDeaths = (totalDeaths / totalMatches).toFixed(1);
-      const averageAssists = (totalAssists / totalMatches).toFixed(1);
-
-      const averageKDA =
-        totalDeaths === 0
-          ? (totalKills + totalAssists).toFixed(2) // Avoid division by zero
-          : ((totalKills + totalAssists) / totalDeaths).toFixed(2);
-
-      const killParticipation =
-        totalMatches > 0
-          ? ((totalKillParticipation / totalMatches) * 100).toFixed(0) + "%"
-          : "0%";
-
-      // Calculate champion statistics
+      let wins = 0;
       const championStatsMap = new Map<
         string,
-        {
-          wins: number;
-          losses: number;
-          totalGames: number;
-          kills: number;
-          deaths: number;
-          assists: number;
-        }
+        { wins: number; losses: number; kills: number; deaths: number; assists: number; totalGames: number; }
       >();
 
-      matches.forEach((match) => {
-        const participant = match.participants.find((p) => p.puuid === puuid);
-        if (participant) {
-          const championName = participant.championName;
-          const currentStats = championStatsMap.get(championName) || {
-            wins: 0,
-            losses: 0,
-            totalGames: 0,
-            kills: 0,
-            deaths: 0,
-            assists: 0,
-          };
+      rawMatches.forEach((match) => {
+        const mainParticipant = match.participants.find((p) => p.puuid === puuid);
+        if (!mainParticipant) return;
 
-          currentStats.totalGames++;
-          if (participant.win) {
-            currentStats.wins++;
-          } else {
-            currentStats.losses++;
-          }
-          currentStats.kills += participant.kills;
-          currentStats.deaths += participant.deaths;
-          currentStats.assists += participant.assists;
+        // 요약 정보 계산을 위한 집계
+        if (mainParticipant.win) wins++;
+        totalKills += mainParticipant.kills;
+        totalDeaths += mainParticipant.deaths;
+        totalAssists += mainParticipant.assists;
+        totalKillParticipation += mainParticipant.challenges.killParticipation;
 
-          championStatsMap.set(championName, currentStats);
-        }
+        // 챔피언별 통계 집계
+        const champName = mainParticipant.championName;
+        const champStat = championStatsMap.get(champName) || { wins: 0, losses: 0, kills: 0, deaths: 0, assists: 0, totalGames: 0 };
+        champStat.totalGames++;
+        if (mainParticipant.win) champStat.wins++; else champStat.losses++;
+        champStat.kills += mainParticipant.kills;
+        champStat.deaths += mainParticipant.deaths;
+        champStat.assists += mainParticipant.assists;
+        championStatsMap.set(champName, champStat);
       });
 
-      const calculatedChampionStats: ChampionStats[] = Array.from(
-        championStatsMap.entries()
-      )
-        .map(([championName, stats]) => {
-          const winRate =
-            stats.totalGames > 0
-              ? ((stats.wins / stats.totalGames) * 100).toFixed(0) + "%"
-              : "0%";
-          const kda =
-            stats.deaths === 0
-              ? (stats.kills + stats.assists).toFixed(2) // Avoid division by zero
-              : ((stats.kills + stats.assists) / stats.deaths).toFixed(2);
+      // 3. 최종 통계 계산
+      const totalMatches = rawMatches.length;
+      const losses = totalMatches - wins;
 
-          return {
-            championName,
-            wins: stats.wins,
-            losses: stats.losses,
-            winRate,
-            kda: `${kda}:1`,
-          };
-        })
-        .sort((a, b) => b.wins + b.losses - (a.wins + a.losses)); // Sort by total games played (descending)
+      const summary: MatchSummary = {
+        totalMatches,
+        wins,
+        losses,
+        winRate: totalMatches > 0 ? `${Math.round((wins / totalMatches) * 100)}%` : "0%",
+        averageKills: totalKills / totalMatches,
+        averageDeaths: totalDeaths / totalMatches,
+        averageAssists: totalAssists / totalMatches,
+        averageKDA: calculateKDAString(totalKills, totalDeaths, totalAssists),
+        killParticipation: totalMatches > 0 ? `${Math.round((totalKillParticipation / totalMatches) * 100)}%` : "0%",
+      };
 
+      const championStats: ChampionStats[] = Array.from(championStatsMap.entries())
+        .map(([championName, stats]) => ({
+          championName,
+          wins: stats.wins,
+          losses: stats.losses,
+          totalGames: stats.totalGames,
+          winRate: stats.totalGames > 0 ? `${Math.round((stats.wins / stats.totalGames) * 100)}%` : "0%",
+          kda: calculateKDAString(stats.kills, stats.deaths, stats.assists),
+        }))
+        .sort((a, b) => b.totalGames - a.totalGames);
+
+      // 4. 계산된 데이터와 원본 매치 데이터로 상태 업데이트
       set({
-        matches,
-        summary: {
-          totalMatches,
-          wins,
-          losses,
-          winRate,
-          averageKDA: `${averageKDA}:1`,
-          averageKills,
-          averageDeaths,
-          averageAssists,
-          killParticipation,
-        },
-        championStats: calculatedChampionStats,
+        matches: rawMatches, // 원본 MatchDto[]를 그대로 저장
+        summary,
+        championStats,
         isLoading: false,
       });
     } catch (error: any) {

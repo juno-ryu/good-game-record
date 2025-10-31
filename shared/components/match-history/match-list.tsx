@@ -1,10 +1,9 @@
-// shared/components/match-history/match-list.tsx
 "use client";
 
-import { useEffect, useState } from "react"; // useState 임포트
+import { useEffect } from "react";
 import { useMatchStore } from "@/shared/store/match-store";
 import MatchCard from "./match-card";
-import MatchDetailModal from "./match-detail-modal"; // MatchDetailModal 임포트
+import * as Accordion from "@radix-ui/react-accordion";
 
 interface MatchListProps {
   puuid: string;
@@ -12,19 +11,12 @@ interface MatchListProps {
 
 export default function MatchList({ puuid }: MatchListProps) {
   const { matches, isLoading, error, fetchMatches } = useMatchStore();
-  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null); // 선택된 매치 ID 상태
-  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림/닫힘 상태
 
   useEffect(() => {
     if (puuid) {
       fetchMatches(puuid);
     }
   }, [puuid, fetchMatches]);
-
-  const handleCardClick = (matchId: string) => {
-    setSelectedMatchId(matchId);
-    setIsModalOpen(true);
-  };
 
   if (isLoading) {
     return (
@@ -53,24 +45,12 @@ export default function MatchList({ puuid }: MatchListProps) {
   }
 
   return (
-    <div className="container mx-auto">
+    <Accordion.Root type="single" collapsible className="w-full">
       <div className="grid grid-cols-1 gap-4">
         {matches.map((match) => (
-          <MatchCard
-            key={match.matchId}
-            match={match}
-            onCardClick={handleCardClick}
-          />
+          <MatchCard key={match.gameId} match={match} puuid={puuid} />
         ))}
       </div>
-      <MatchDetailModal
-        isOpen={isModalOpen}
-        onOpenChange={setIsModalOpen}
-        matchId={selectedMatchId}
-        matchDetails={matches.find(
-          (match) => match.matchId === selectedMatchId
-        )} // 선택된 매치 상세 정보 전달
-      />
-    </div>
+    </Accordion.Root>
   );
 }
