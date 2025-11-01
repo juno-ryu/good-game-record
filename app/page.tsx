@@ -144,8 +144,8 @@ export default function Home() {
         )}
 
         {summonerData && (
-          <div className="flex flex-col md:flex-row gap-4 mt-4">
-            <div className="w-full md:w-3/10 space-y-4">
+          <div className="flex flex-col md:flex-row gap-3 mt-3">
+            <div className="w-full md:w-3/10 gap-3 flex flex-col">
               <SummonerProfile summonerData={summonerData} />
               {summonerData?.puuid && <MatchSummary />}
               {summonerData?.puuid && <ChampionSummary />}

@@ -25,7 +25,7 @@ export default function ChampionSummary() {
   }
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-md text-white mb-4">
+    <div className="bg-gray-800 p-4 rounded-lg shadow-md text-white">
       <h2 className="text-md font-bold mb-4">최근 플레이한 챔피언</h2>
       <div className="space-y-3">
         {championStats.map((champ: ChampionStats) => (

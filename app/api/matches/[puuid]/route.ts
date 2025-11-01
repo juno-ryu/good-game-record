@@ -13,7 +13,7 @@ export async function GET(
   try {
     // 1. Fetch match IDs
     const matchIdsResponse = await fetch(
-      `https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10`, // Fetching 20 matches as per PRD2
+      `https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=20`, // Fetching 20 matches as per PRD2
       {
         headers: {
           "X-Riot-Token": process.env.RIOT_API_KEY || "",

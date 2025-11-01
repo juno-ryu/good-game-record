@@ -10,7 +10,7 @@ export type MatchDto = {
   gameMode: "SWIFTPLAY" | "CLASSIC" | string;
   gameName: string;
   gameStartTimestamp: number;
-  gameType: string;
+  gameType: "MATCHED_GAME" | string;
   gameVersion: string;
   mapId: number;
   participants: ParticipantDto[];

@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-export const DDRAGON_VERSION = "14.10.1";
+export const DDRAGON_VERSION = "15.21.1";
 
 export const getChampionIconUrl = (championName: string) =>
   `https://ddragon.leagueoflegends.com/cdn/${DDRAGON_VERSION}/img/champion/${championName}.png`;

@@ -46,7 +46,7 @@ export default function MatchList({ puuid }: MatchListProps) {
 
   return (
     <Accordion.Root type="single" collapsible className="w-full">
-      <div className="grid grid-cols-1 gap-4">
+      <div className="grid grid-cols-1 gap-1">
         {matches.map((match) => (
           <MatchCard key={match.gameId} match={match} puuid={puuid} />
         ))}

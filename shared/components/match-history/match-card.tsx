@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/ko";
 import * as Accordion from "@radix-ui/react-accordion";
+import * as Label from "@radix-ui/react-label";
 import MatchDetailAccordion from "./match-detail-accordion";
 import { MatchDto } from "@/shared/utils/types/match-dto";
 import { ParticipantDto } from "@/shared/utils/types/participan-dto";
@@ -13,6 +14,10 @@ import {
   getItemIconUrl,
   getSpellIconUrl,
 } from "@/shared/utils/helpers/ddragon-urls";
+import {
+  formattedGameMode,
+  getMultiKillLabel,
+} from "@/shared/utils/helpers/helper";
 
 dayjs.extend(relativeTime);
 dayjs.locale("ko");
@@ -23,7 +28,7 @@ interface MatchCardProps {
 }
 
 export default function MatchCard({ match, puuid }: MatchCardProps) {
-  const { gameId, gameCreation, gameDuration, gameMode } = match;
+  const { gameId, gameCreation, gameDuration, gameMode, gameType } = match;
 
   const participant: ParticipantDto | undefined = match.participants.find(
     (p) => p.puuid === puuid
@@ -63,9 +68,9 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
               participant.win ? "bg-blue-400" : "bg-red-400"
             } absolute w-[5px] h-full`}
           />
-          <div className="grid grid-cols-12 gap-2 items-center text-white text-xs p-4">
+          <div className="flex flex-wrap gap-2 items-center text-white text-xs px-3 py-2 justify-between">
             {/* Left Column */}
-            <div className="col-span-2 flex flex-col justify-between items-start h-[60%]">
+            <div className="flex flex-col items-start justify-between mr-3 w-[80px]">
               <p
                 className={`font-bold ${
                   participant.win ? "text-blue-400" : "text-red-400"
@@ -74,13 +79,16 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
                 {participant.win ? "승리" : "패배"}
               </p>
               <p className="mb-auto">{gameDate}</p>
+              <div className="border-gray-600 border-1 w-full h-[1px] my-2" />
               <p>{formattedDuration}</p>
-              <p className="text-gray-400">{gameMode}</p>
+              <p className="text-gray-400">
+                {formattedGameMode(gameMode, gameType)}
+              </p>
             </div>
 
-            {/* Middle Column 1 (Player) */}
-            <div className="col-span-3 flex flex-col">
-              <div className="flex items-start gap-1">
+            {/* Middle Column 1 (Player info) */}
+            <div className="flex flex-col mr-auto">
+              <div className="flex items-start gap-2">
                 <Image
                   src={getChampionIconUrl(participant.championName)}
                   alt={participant.championName}
@@ -112,12 +120,35 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
                   <div className="w-[20px] h-[20px] bg-gray-600 rounded-full"></div>
                   <div className="w-[20px] h-[20px] bg-gray-500 rounded-full"></div>
                 </div>
-                <div className="flex items-center justify-center h-full">
-                  <div className="w-[20px] h-[20px] bg-gray-600 rounded-full"></div>
+                <div className="flex flex-col items-start justify-center h-full">
+                  <p className="font-bold text-sm">
+                    {participant.kills} / {participant.deaths} /
+                    {participant.assists}
+                  </p>
+                  <p className="text-xs">{kda}:1 평점</p>
+                </div>
+                <div className="flex flex-col items-start justify-center h-full relative pl-3">
+                  <div className="border-gray-600 border-1 absolute left-0 h-full w-[1px]" />
+                  <p>
+                    킬관여:
+                    {Math.round(participant.challenges.killParticipation * 100)}
+                    %
+                  </p>
+                  <p>
+                    CS:
+                    {participant.totalMinionsKilled +
+                      participant.neutralMinionsKilled}
+                    ({csPerMinute})
+                  </p>
+                  <p>
+                    와드: {participant.wardsPlaced} / {participant.wardsKilled}
+                  </p>
                 </div>
               </div>
-              <div className="flex flex-wrap gap-0.5 mt-2">
-                {[...Array(6)].map((_, i) => {
+
+              {/* items */}
+              <div className="flex flex-wrap mt-2 gap-1 mr-2">
+                {[...Array(7)].map((_, i) => {
                   const item = participant[
                     `item${i}` as keyof ParticipantDto
                   ] as number;
@@ -138,37 +169,18 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
                     ></div>
                   );
                 })}
-                {/* Trinket placeholder */}
+                {getMultiKillLabel(participant) && (
+                  <Label.Root className="bg-red-900 flex justify-center items-center rounded-lg px-2 text-xs">
+                    {getMultiKillLabel(participant)}
+                  </Label.Root>
+                )}
               </div>
             </div>
 
-            {/* Middle Column 2 (Stats) */}
-            <div className="col-span-2 text-left flex flex-col gap-1">
-              <p className="font-bold text-sm">
-                {participant.kills} / {participant.deaths} /
-                {participant.assists}
-              </p>
-              <p className="text-sm font-bold">{kda} KDA</p>
-              <p>
-                킬관여:
-                {Math.round(participant.challenges.killParticipation * 100)}%
-              </p>
-              <p>
-                CS:
-                {participant.totalMinionsKilled +
-                  participant.neutralMinionsKilled}
-                ({csPerMinute})
-              </p>
-              <p>
-                와드: {participant.wardsPlaced} / {participant.wardsKilled}
-              </p>
-            </div>
-
             {/* Right Column (Teams) */}
-            <div className="col-span-5 flex justify-end gap-4">
-              <div className="flex flex-col space-y-1">
+            <div className="flex justify-end gap-4">
+              <div className="flex flex-col gap-0.5">
                 {team1.map((p) => {
-                  console.log(p);
                   return (
                     <div key={p.puuid} className="flex items-center">
                       <Image
@@ -186,7 +198,7 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
                   );
                 })}
               </div>
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col gap-0.5">
                 {team2.map((p) => (
                   <div key={p.puuid} className="flex items-center ">
                     <Image

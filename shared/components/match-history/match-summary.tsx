@@ -31,7 +31,7 @@ export default function MatchSummary() {
   }
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg shadow-md text-white mb-4">
+    <div className="bg-gray-800 p-4 rounded-lg shadow-md text-white">
       <p className="text-md mb-4">
         {summary.totalMatches}G {summary.wins}W {summary.losses}L
       </p>
