@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { MatchDto } from "@/shared/utils/types/match-dto";
+import { MatchDto } from "@/utils/types/match-dto";
 
 // ----------------- UI에 필요한 타입 정의 -----------------
 
@@ -73,7 +73,12 @@ export const useMatchStore = create<MatchState>((set) => ({
       const rawMatches: MatchDto[] = await response.json();
 
       if (rawMatches.length === 0) {
-        set({ matches: [], summary: null, championStats: [], isLoading: false });
+        set({
+          matches: [],
+          summary: null,
+          championStats: [],
+          isLoading: false,
+        });
         return;
       }
 
@@ -85,11 +90,20 @@ export const useMatchStore = create<MatchState>((set) => ({
       let wins = 0;
       const championStatsMap = new Map<
         string,
-        { wins: number; losses: number; kills: number; deaths: number; assists: number; totalGames: number; }
+        {
+          wins: number;
+          losses: number;
+          kills: number;
+          deaths: number;
+          assists: number;
+          totalGames: number;
+        }
       >();
 
       rawMatches.forEach((match) => {
-        const mainParticipant = match.participants.find((p) => p.puuid === puuid);
+        const mainParticipant = match.participants.find(
+          (p) => p.puuid === puuid
+        );
         if (!mainParticipant) return;
 
         // 요약 정보 계산을 위한 집계
@@ -101,9 +115,17 @@ export const useMatchStore = create<MatchState>((set) => ({
 
         // 챔피언별 통계 집계
         const champName = mainParticipant.championName;
-        const champStat = championStatsMap.get(champName) || { wins: 0, losses: 0, kills: 0, deaths: 0, assists: 0, totalGames: 0 };
+        const champStat = championStatsMap.get(champName) || {
+          wins: 0,
+          losses: 0,
+          kills: 0,
+          deaths: 0,
+          assists: 0,
+          totalGames: 0,
+        };
         champStat.totalGames++;
-        if (mainParticipant.win) champStat.wins++; else champStat.losses++;
+        if (mainParticipant.win) champStat.wins++;
+        else champStat.losses++;
         champStat.kills += mainParticipant.kills;
         champStat.deaths += mainParticipant.deaths;
         champStat.assists += mainParticipant.assists;
@@ -118,21 +140,32 @@ export const useMatchStore = create<MatchState>((set) => ({
         totalMatches,
         wins,
         losses,
-        winRate: totalMatches > 0 ? `${Math.round((wins / totalMatches) * 100)}%` : "0%",
+        winRate:
+          totalMatches > 0
+            ? `${Math.round((wins / totalMatches) * 100)}%`
+            : "0%",
         averageKills: totalKills / totalMatches,
         averageDeaths: totalDeaths / totalMatches,
         averageAssists: totalAssists / totalMatches,
         averageKDA: calculateKDAString(totalKills, totalDeaths, totalAssists),
-        killParticipation: totalMatches > 0 ? `${Math.round((totalKillParticipation / totalMatches) * 100)}%` : "0%",
+        killParticipation:
+          totalMatches > 0
+            ? `${Math.round((totalKillParticipation / totalMatches) * 100)}%`
+            : "0%",
       };
 
-      const championStats: ChampionStats[] = Array.from(championStatsMap.entries())
+      const championStats: ChampionStats[] = Array.from(
+        championStatsMap.entries()
+      )
         .map(([championName, stats]) => ({
           championName,
           wins: stats.wins,
           losses: stats.losses,
           totalGames: stats.totalGames,
-          winRate: stats.totalGames > 0 ? `${Math.round((stats.wins / stats.totalGames) * 100)}%` : "0%",
+          winRate:
+            stats.totalGames > 0
+              ? `${Math.round((stats.wins / stats.totalGames) * 100)}%`
+              : "0%",
           kda: calculateKDAString(stats.kills, stats.deaths, stats.assists),
         }))
         .sort((a, b) => b.totalGames - a.totalGames);

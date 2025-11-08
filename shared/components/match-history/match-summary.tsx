@@ -1,7 +1,7 @@
 // shared/components/match-history/match-summary.tsx
 "use client";
 
-import { useMatchStore } from "@/shared/store/match-store";
+import { useMatchStore } from "@/store/match-store";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useMatchStore } from "@/shared/store/match-store";
+import { useMatchStore } from "@/store/match-store";
 import MatchCard from "./match-card";
 import * as Accordion from "@radix-ui/react-accordion";
 

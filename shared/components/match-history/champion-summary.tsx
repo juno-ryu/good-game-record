@@ -2,7 +2,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMatchStore, ChampionStats } from "@/shared/store/match-store";
+import { useMatchStore, ChampionStats } from "@/store/match-store";
 
 const DDRAGON_VERSION = "14.10.1"; // Data Dragon 버전 상수화
 

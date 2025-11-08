@@ -1,7 +1,7 @@
 "use client";
 
-import { MatchDto } from "@/shared/utils/types/match-dto";
-import { calculateFinalScore } from "@/shared/utils/helpers/helper";
+import { MatchDto } from "@/types/match-dto";
+import { calculateFinalScore } from "@/lib/helper";
 import SummaryBar from "./summary-bar";
 import TeamStats from "./team-stats";
 

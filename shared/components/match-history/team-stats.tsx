@@ -1,8 +1,9 @@
 "use client";
 
-import { ParticipantDto } from "@/shared/utils/types/participan-dto";
-import { TeamDto } from "@/shared/utils/types/team-dto";
-import PlayerStatsRow from "./player-stats-row";
+import PlayerStatsRow from "@/components/match-history/player-stats-row";
+import { ParticipantDto } from "@/types/participan-dto";
+
+import { TeamDto } from "@/types/team-dto";
 
 interface TeamStatsProps {
   team: "승리팀" | "패배팀";
@@ -43,13 +44,13 @@ export default function TeamStats({
         </p> */}
       </div>
       {/* Header for the player stats table */}
-      <div className="grid grid-cols-10 text-xs text-gray-400 px-2 py-1">
-        <div className="col-span-3">플레이어</div>
-        <div className="col-span-1">KDA</div>
+      <div className="grid grid-cols-9 sm:grid-cols-10 text-xs text-gray-400 px-2 py-1">
+        <div className="col-span-4 sm:col-span-3">플레이어</div>
+        <div className="col-span-2 sm:col-span-1">KDA</div>
         <div className="col-span-1">와드</div>
         <div className="col-span-1">CS</div>
         <div className="col-span-1">데미지</div>
-        <div className="col-span-3 text-right">아이템</div>
+        <div className="col-span-3 text-right hidden sm:flex">아이템</div>
       </div>
       <div>
         {teamData.map((participant) => (

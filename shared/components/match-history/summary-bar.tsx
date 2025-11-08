@@ -1,7 +1,7 @@
 "use client";
 
-import { ParticipantDto } from "@/shared/utils/types/participan-dto";
-import { TeamDto } from "@/shared/utils/types/team-dto";
+import { ParticipantDto } from "@/types/participan-dto";
+import { TeamDto } from "@/types/team-dto";
 import { Line } from "rc-progress";
 
 interface SummaryBarProps {

@@ -39,6 +39,10 @@ yarn-error.log*
 # gemini specific
 .gemini/
 
+# cursor specific
+.cursor/
+.cursorignore
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

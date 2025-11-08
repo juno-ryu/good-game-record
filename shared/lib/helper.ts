@@ -1,5 +1,5 @@
-import { MatchDto } from "@/shared/utils/types/match-dto";
-import { ParticipantDto } from "@/shared/utils/types/participan-dto";
+import { MatchDto } from "@/types/match-dto";
+import { ParticipantDto } from "@/types/participan-dto";
 
 export const getMultiKillLabel = (participant: ParticipantDto): string => {
   if (participant.pentaKills > 0) {

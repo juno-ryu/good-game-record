@@ -3,15 +3,13 @@
 import { useEffect, useState } from "react";
 import * as Form from "@radix-ui/react-form";
 import { Search, Loader2, Gamepad } from "lucide-react";
-import {
-  SummonerProfile,
-  SummonerData,
-} from "@/shared/components/summoner-profile";
-import MatchList from "@/shared/components/match-history/match-list";
-import ChampionSummary from "@/shared/components/match-history/champion-summary";
-import MatchSummary from "@/shared/components/match-history/match-summary";
-import { useSummonerStore, RecentSearch } from "@/shared/store/summoner-store";
+import { SummonerProfile, SummonerData } from "@/components/summoner-profile";
+import MatchList from "@/components/match-history/match-list";
+import ChampionSummary from "@/components/match-history/champion-summary";
+import MatchSummary from "@/components/match-history/match-summary";
+import { useSummonerStore, RecentSearch } from "@/store/summoner-store";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const {
@@ -77,6 +75,7 @@ export default function Home() {
         <h1 className="text-4xl font-bold text-center mb-8 flex items-center justify-center gap-2 mx-auto">
           <Gamepad size={36} /> GGR
         </h1>
+
         <Form.Root
           onSubmit={handleSubmit}
           className={`relative ${summonerData ? "w-full" : "max-w-lg mx-auto"}`}
@@ -136,21 +135,19 @@ export default function Home() {
             </div>
           )}
         </Form.Root>
-
         {error && (
           <div className="text-red-500 text-center p-2 bg-red-900/50 rounded-lg">
             {error}
           </div>
         )}
-
         {summonerData && (
-          <div className="flex flex-col md:flex-row gap-3 mt-3">
-            <div className="w-full md:w-3/10 gap-3 flex flex-col">
+          <div className="flex flex-col lg:flex-row gap-3 mt-3">
+            <div className="w-full lg:w-3/10 gap-3 flex flex-col">
               <SummonerProfile summonerData={summonerData} />
               {summonerData?.puuid && <MatchSummary />}
               {summonerData?.puuid && <ChampionSummary />}
             </div>
-            <div className="w-full md:w-7/10">
+            <div className="w-full lg:w-7/10">
               {summonerData?.puuid && <MatchList puuid={summonerData.puuid} />}
             </div>
           </div>

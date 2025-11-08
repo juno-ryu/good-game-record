@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SummonerData } from "@/shared/components/summoner-profile";
+import type { SummonerData } from "@/components/summoner-profile";
 
 export interface RecentSearch {
   riotId: string;

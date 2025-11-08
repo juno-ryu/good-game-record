@@ -6,18 +6,15 @@ import "dayjs/locale/ko";
 import * as Accordion from "@radix-ui/react-accordion";
 import * as Label from "@radix-ui/react-label";
 import MatchDetailAccordion from "./match-detail-accordion";
-import { MatchDto } from "@/shared/utils/types/match-dto";
-import { ParticipantDto } from "@/shared/utils/types/participan-dto";
 import Image from "next/image";
 import {
   getChampionIconUrl,
   getItemIconUrl,
   getSpellIconUrl,
-} from "@/shared/utils/helpers/ddragon-urls";
-import {
-  formattedGameMode,
-  getMultiKillLabel,
-} from "@/shared/utils/helpers/helper";
+} from "@/lib/ddragon-urls";
+import { formattedGameMode, getMultiKillLabel } from "@/lib/helper";
+import { MatchDto } from "@/types/match-dto";
+import { ParticipantDto } from "@/types/participan-dto";
 
 dayjs.extend(relativeTime);
 dayjs.locale("ko");
@@ -60,7 +57,7 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
   )}초`;
 
   return (
-    <Accordion.Item value={gameId.toString()} className="border-gray-700">
+    <Accordion.Item value={gameId.toString()} className="border-gray-700 ">
       <Accordion.Trigger className="w-full">
         <div className="relative rounded-lg shadow-md transition-all duration-200 bg-gray-800 hover:bg-gray-700 overflow-hidden">
           <div
@@ -70,18 +67,18 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
           />
           <div className="flex flex-wrap gap-2 items-center text-white text-xs px-3 py-2 justify-between">
             {/* Left Column */}
-            <div className="flex flex-col items-start justify-between mr-3 w-[80px]">
+            <div className="flex flex-row sm:flex-col items-start justify-between mr-3 w-full sm:w-[80px] relative h-[35px] sm:h-auto ml-3 sm:ml-0">
               <p
-                className={`font-bold ${
+                className={`font-bold whitespace-pre ${
                   participant.win ? "text-blue-400" : "text-red-400"
                 }`}
               >
                 {participant.win ? "승리" : "패배"}
               </p>
-              <p className="mb-auto">{gameDate}</p>
-              <div className="border-gray-600 border-1 w-full h-[1px] my-2" />
-              <p>{formattedDuration}</p>
-              <p className="text-gray-400">
+              <p className="mb-auto  whitespace-pre">{gameDate}</p>
+              <div className="border-gray-600 whitespace-pre border-1 w-full h-[1px] my-2 absolute sm:relative bottom-0" />
+              <p className="whitespace-pre">{formattedDuration}</p>
+              <p className="text-gray-400 whitespace-pre">
                 {formattedGameMode(gameMode, gameType)}
               </p>
             </div>
@@ -125,7 +122,9 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
                     {participant.kills} / {participant.deaths} /
                     {participant.assists}
                   </p>
-                  <p className="text-xs">{kda}:1 평점</p>
+                  <p className="text-xs">
+                    {kda === "Perfect" ? "Perfect" : `${kda}:1평점`}
+                  </p>
                 </div>
                 <div className="flex flex-col items-start justify-center h-full relative pl-3">
                   <div className="border-gray-600 border-1 absolute left-0 h-full w-[1px]" />
@@ -178,7 +177,7 @@ export default function MatchCard({ match, puuid }: MatchCardProps) {
             </div>
 
             {/* Right Column (Teams) */}
-            <div className="flex justify-end gap-4">
+            <div className="justify-end gap-4 hidden sm:flex">
               <div className="flex flex-col gap-0.5">
                 {team1.map((p) => {
                   return (

@@ -2,12 +2,9 @@ import {
   getChampionIconUrl,
   getItemIconUrl,
   getSpellIconUrl,
-} from "@/shared/utils/helpers/ddragon-urls";
-import {
-  calculateFinalScore,
-  getRankLabelProps,
-} from "@/shared/utils/helpers/helper";
-import { ParticipantDto } from "@/shared/utils/types/participan-dto";
+} from "@/lib/ddragon-urls";
+import { calculateFinalScore, getRankLabelProps } from "@/lib/helper";
+import { ParticipantDto } from "@/types/participan-dto";
 import { Line } from "rc-progress";
 import Image from "next/image";
 import * as Label from "@radix-ui/react-label";
@@ -47,9 +44,9 @@ export default function PlayerStatsRow({
   const rankLabelProps = getRankLabelProps(rank, isAce);
 
   return (
-    <div className="grid grid-cols-10 items-center text-xs text-white px-2 py-1 border-t border-gray-700">
+    <div className="grid grid-cols-9 sm:grid-cols-10 items-center text-xs text-white px-2 py-1 border-t border-gray-700">
       {/* Player Info */}
-      <div className="col-span-3 flex items-center justify-between gap-2">
+      <div className="col-span-4 sm:col-span-3 flex items-center justify-between gap-2">
         <Image
           src={getChampionIconUrl(participant.championName)}
           alt={participant.championName}
@@ -57,7 +54,7 @@ export default function PlayerStatsRow({
           height={32}
           className="rounded-md"
         />
-        <div className="flex flex-col gap-0.5">
+        <div className="flex-col gap-0.5 hidden sm:flex">
           <Image
             src={getSpellIconUrl(participant.summoner1Id)}
             alt="Summoner Spell 1"
@@ -74,12 +71,16 @@ export default function PlayerStatsRow({
           />
         </div>
         <div className="mr-auto">
-          <p className="font-semibold">{participant.riotIdGameName}</p>
-          <p className="text-gray-400">Level {participant.champLevel}</p>
+          <p className="font-semibold whitespace-pre">
+            {participant.riotIdGameName}
+          </p>
+          <p className="text-gray-400 whitespace-pre">
+            Level {participant.champLevel}
+          </p>
         </div>
         {rankLabelProps && (
           <Label.Root
-            className={`${rankLabelProps.bgColor} flex justify-center items-center rounded-lg px-2 text-xs font-bold mr-3`}
+            className={`${rankLabelProps.bgColor} hidden sm:flex justify-center items-center rounded-lg px-2 text-xs font-bold mr-3 whitespace-pre`}
           >
             {rankLabelProps.text}
           </Label.Root>
@@ -87,8 +88,8 @@ export default function PlayerStatsRow({
       </div>
 
       {/* KDA */}
-      <div className="col-span-1">
-        <p className="font-semibold text-blue-300">
+      <div className="col-span-2 sm:col-span-1">
+        <p className="font-semibold text-blue-300 whitespace-pre">
           {participant.kills} / {participant.deaths} / {participant.assists}
         </p>
         <p className="text-gray-400">{kda}:1</p>
@@ -124,7 +125,7 @@ export default function PlayerStatsRow({
       </div>
 
       {/* Items */}
-      <div className="col-span-3 flex justify-end gap-1">
+      <div className="col-span-3 justify-end gap-1 hidden sm:flex">
         {[...Array(6)].map((_, i) => {
           const item = participant[
             `item${i}` as keyof ParticipantDto
