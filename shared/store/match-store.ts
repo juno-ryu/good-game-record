@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { MatchDto } from "@/utils/types/match-dto";
+import { MatchDto } from "@/types/match-dto";
 
 // ----------------- UI에 필요한 타입 정의 -----------------
 
